@@ -11,6 +11,19 @@ export function findRecipe(id: string): Recipe | undefined {
   return store.state().recipes.find((r) => r.id === id);
 }
 
+/** A link to the recipe's web page, or the source as text. A malformed address ("https://") is shown as
+ *  text instead of breaking the page, which is what new URL() throwing used to do. */
+function sourceLink(source: string): Node | string {
+  if (!/^https?:\/\//i.test(source)) return source;
+  try {
+    const host = new URL(source).hostname.replace(/^www\./, "");
+    if (!host) return source;
+    return h("a", { href: source, rel: "noopener noreferrer", target: "_blank" }, host);
+  } catch {
+    return source;
+  }
+}
+
 function time(r: Recipe): string | undefined {
   const total = (r.prepMinutes ?? 0) + (r.cookMinutes ?? 0);
   return total ? formatMinutes(total) : undefined;
@@ -92,9 +105,7 @@ export function recipePage(id: string, query: URLSearchParams): Node {
         h("div", { class: "facts" },
           recipe.prepMinutes ? h("span", {}, "Prep ", h("strong", {}, formatMinutes(recipe.prepMinutes))) : null,
           recipe.cookMinutes ? h("span", {}, "Cook ", h("strong", {}, formatMinutes(recipe.cookMinutes))) : null,
-          recipe.source ? h("span", {}, "From ", /^https?:\/\//.test(recipe.source)
-            ? h("a", { href: recipe.source, rel: "noopener noreferrer", target: "_blank" }, new URL(recipe.source).hostname)
-            : recipe.source) : null),
+          recipe.source ? h("span", {}, "From ", sourceLink(recipe.source)) : null),
         recipe.tags.length ? h("div", { class: "row", style: "margin-top:.5rem" },
           recipe.tags.map((t) => h("a", { class: "chip", href: `#/recipes?tag=${encodeURIComponent(t)}` }, t))) : null),
       h("div", { class: "row no-print" },
