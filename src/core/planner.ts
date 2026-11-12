@@ -10,7 +10,7 @@
  * always have (salt, pepper, oil...) are left off, and water never appears.
  */
 
-import { type Aisle, AISLES, type Ingredient, aisle, isBought, isHeading, key, parseIngredient } from "./ingredients.js";
+import { type Aisle, AISLES, type Ingredient, aisle, isBought, isHeading, key, parseIngredient, shoppingName } from "./ingredients.js";
 import type { Recipe } from "./recipes.js";
 import { type Amount, add, format, scale, tidy } from "./units.js";
 
@@ -142,7 +142,7 @@ export function shoppingList(plan: Plan, recipes: Recipe[], days: string[], stap
   const groups = new Map<Aisle, ShoppingLine[]>();
   for (const [k, g] of gathered) {
     const where = aisle(g.name);
-    const line: ShoppingLine = { key: k, name: g.name.charAt(0).toUpperCase() + g.name.slice(1), aisle: where,
+    const line: ShoppingLine = { key: k, name: shoppingName(g.name), aisle: where,
                                  amounts: g.amounts.map((a) => format(roundUpCount(tidy(a)))), recipes: [...g.recipes].sort() };
     groups.set(where, [...(groups.get(where) ?? []), line]);
   }

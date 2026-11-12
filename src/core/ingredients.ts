@@ -167,6 +167,14 @@ export function key(name: string): string {
   return kept.map((w, i) => (i === kept.length - 1 ? singular(w) : w)).join(" ");
 }
 
+/** The name for a shopping list: without preparation words ("grated ginger" is bought as ginger). */
+export function shoppingName(name: string): string {
+  const words = name.trim().split(/\s+/);
+  const kept = KEEP_PREP.has(words.join(" ").toLowerCase()) ? words : words.filter((w) => !PREP.has(w.toLowerCase()));
+  const out = (kept.length ? kept : words).join(" ");
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
 export const AISLES = ["Produce", "Meat & fish", "Dairy & eggs", "Bakery", "Pantry", "Spices & herbs", "Frozen", "Drinks", "Other"] as const;
 export type Aisle = (typeof AISLES)[number];
 

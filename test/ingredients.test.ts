@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { type Ingredient, aisle, isBought, isHeading, key, parseIngredient, parseIngredients } from "../src/core/ingredients.js";
+import { type Ingredient, aisle, isBought, isHeading, key, parseIngredient, parseIngredients, shoppingName } from "../src/core/ingredients.js";
 import { format } from "../src/core/units.js";
 
 function read(line: string) {
@@ -70,4 +70,13 @@ test("aisles follow the shop", () => {
   assert.equal(aisle("lemon juice"), "Produce");
   assert.equal(isBought("cold water"), false);
   assert.equal(isBought("milk"), true);
+});
+
+
+test("shopping names leave out how things are prepared", () => {
+  assert.equal(shoppingName("grated ginger"), "Ginger");
+  assert.equal(shoppingName("finely chopped fresh parsley"), "Parsley");
+  assert.equal(shoppingName("Ground beef"), "Ground beef");
+  assert.equal(shoppingName("unsalted butter"), "Unsalted butter");
+  assert.equal(shoppingName("chopped"), "Chopped");
 });
