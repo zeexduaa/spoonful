@@ -99,3 +99,15 @@ test("merging a backup keeps the latest edit of each recipe", () => {
   const older = s.merge(state, { ...s.emptyState(), recipes: [{ ...a, title: "Old soup" }] });
   assert.equal(older.updated, 0);
 });
+
+
+test("a damaged backup can't put bad values into recipes", () => {
+  const state = s.parseState({ format: "spoonful", version: 1, recipes: [{
+    id: "a", title: "  Soup  ", servings: "lots", prepMinutes: "abc", cookMinutes: -5, rating: 99, favorite: "yes", source: 42,
+    notes: { x: 1 }, steps: ["Heat", 7], ingredients: "not a list", unknownField: "<script>",
+  }, { id: "b", title: "Stew", prepMinutes: "15", cookMinutes: 90, rating: 4, favorite: true, notes: "good" }] });
+  const [soup, stew] = state.recipes;
+  assert.deepEqual(Object.keys(soup!).sort(), ["created", "id", "ingredients", "servings", "steps", "tags", "title", "updated"]);
+  assert.deepEqual([soup!.title, soup!.servings, soup!.steps, soup!.ingredients], ["Soup", 4, ["Heat"], []]);
+  assert.deepEqual([stew!.prepMinutes, stew!.cookMinutes, stew!.rating, stew!.favorite, stew!.notes], [15, 90, 4, true, "good"]);
+});

@@ -57,9 +57,19 @@ export function parseState(doc: unknown): State {
   const recipes: Recipe[] = [];
   for (const r of Array.isArray(d.recipes) ? d.recipes : []) {
     if (!r || typeof r.id !== "string" || typeof r.title !== "string" || !r.title.trim()) continue;
+    // Keep only fields of the right kind and range: a backup may have been edited by hand or damaged,
+    // and a non-text note or a time of "abc" would otherwise break the pages that show them.
+    const clean: Record<string, unknown> = { id: r.id, title: r.title.trim().slice(0, 150) };
+    for (const key of ["prepMinutes", "cookMinutes"]) {
+      const n = Number(r[key]);
+      if (r[key] !== undefined && Number.isFinite(n) && n > 0 && n <= 60 * 24 * 7) clean[key] = Math.round(n);
+    }
+    for (const key of ["notes", "source"]) if (typeof r[key] === "string" && r[key].trim()) clean[key] = r[key];
+    if (r.favorite === true) clean.favorite = true;
+    if (Number.isInteger(r.rating) && r.rating >= 1 && r.rating <= 5) clean.rating = r.rating;
     recipes.push({
-      ...r,
-      servings: Number(r.servings) > 0 ? Number(r.servings) : 4,
+      ...(clean as { id: string; title: string }),
+      servings: Number(r.servings) > 0 && Number(r.servings) <= 500 ? Number(r.servings) : 4,
       ingredients: Array.isArray(r.ingredients) ? r.ingredients.filter((x: unknown) => typeof x === "string") : [],
       steps: Array.isArray(r.steps) ? r.steps.filter((x: unknown) => typeof x === "string") : [],
       tags: Array.isArray(r.tags) ? cleanTags(r.tags.filter((x: unknown) => typeof x === "string")) : [],
