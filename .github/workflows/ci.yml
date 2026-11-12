@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: ["20", "22"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: The site has what it needs
+        shell: bash
+        run: |
+          for f in index.html styles.css sw.js manifest.webmanifest icon.svg icon-192.png js/ui/app.js js/core/units.js; do
+            test -s "site/$f" || { echo "missing site/$f"; exit 1; }
+          done
+          ! grep -q "__FILES__\|__VERSION__" site/sw.js
