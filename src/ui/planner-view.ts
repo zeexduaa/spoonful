@@ -12,6 +12,12 @@ const label = (date: string) => {
 };
 
 /** Choose a recipe, day, meal and servings. Opens from a day ("+ Add") or from a recipe ("Add to plan"). */
+/** The meal a recipe is probably for, from its tags ("breakfast" recipes go to breakfast); otherwise dinner. */
+export function likelySlot(recipe: Recipe | undefined): Slot {
+  const tags = recipe?.tags ?? [];
+  return SLOTS.find((slot) => tags.includes(slot) || (slot === "snack" && tags.includes("snacks"))) ?? "dinner";
+}
+
 export function addToPlanDialog(recipe: Recipe | undefined, servings: number | undefined, date: string): void {
   const { recipes } = store.state();
   if (!recipes.length) {
@@ -21,11 +27,13 @@ export function addToPlanDialog(recipe: Recipe | undefined, servings: number | u
   const pick = h("select", { required: true },
     [...recipes].sort((a, b) => a.title.localeCompare(b.title)).map((r) => h("option", { value: r.id, selected: r.id === recipe?.id }, r.title)));
   const day = h("input", { type: "date", value: date, required: true });
-  const slot = h("select", {}, SLOTS.map((s) => h("option", { value: s, selected: s === "dinner" }, s[0]!.toUpperCase() + s.slice(1))));
+  const first = recipe ?? [...recipes].sort((a, b) => a.title.localeCompare(b.title))[0];
+  const slot = h("select", {}, SLOTS.map((s) => h("option", { value: s, selected: s === likelySlot(first) }, s[0]!.toUpperCase() + s.slice(1))));
   const serves = h("input", { type: "number", min: 1, max: 500, value: servings ?? recipe?.servings ?? recipes[0]!.servings });
   pick.addEventListener("change", () => {
     const chosen = recipes.find((r) => r.id === pick.value);
     if (chosen && !servings) serves.value = String(chosen.servings);
+    if (chosen) slot.value = likelySlot(chosen);
   });
   const dialog = h("dialog", { "aria-label": "Add to plan" },
     h("form", { method: "dialog", class: "stack", onsubmit: (e: Event) => {
