@@ -25,6 +25,9 @@ test("reads ingredient lines the way recipes write them", () => {
   assert.deepEqual(read("- 1 tbsp chopped parsley (optional)"), ["1 tbsp", "chopped parsley", "", "optional"]);
   assert.deepEqual(read("4 fl oz cream"), ["4 fl oz", "cream", "", ""]);
   assert.deepEqual(read("an avocado"), ["1", "avocado", "", ""]);
+  assert.deepEqual(read("2 garlic cloves, crushed"), ["2 cloves", "garlic", "crushed", ""]);
+  assert.deepEqual(read("3 thyme sprigs"), ["3 sprigs", "thyme", "", ""]);
+  assert.deepEqual(read("2 bay leaves"), ["2", "bay leaves", "", ""]);
 });
 
 test("headings separate parts of a recipe", () => {

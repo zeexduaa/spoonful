@@ -34,6 +34,9 @@ export function isHeading(line: IngredientLine): line is Heading {
   return "heading" in line;
 }
 
+/** Units people put after the name. Not "leaf", which is part of names such as "bay leaves". */
+const TRAILING_UNITS = new Set(["clove", "sprig", "stalk", "slice", "can", "tin", "packet", "bunch", "head", "fillet", "rasher"]);
+
 const SIZES = new Set(["small", "medium", "large", "extra-large", "big", "heaped", "heaping", "level", "rounded", "generous", "scant"]);
 
 function readAmount(text: string): { amount?: Amount; rest: string } {
@@ -116,6 +119,14 @@ export function parseIngredient(rawLine: string): IngredientLine {
   const sizes: string[] = [];
   while (words.length > 1 && SIZES.has(words[0]!.toLowerCase())) sizes.push(words.shift()!.toLowerCase());
   if (sizes.length) notes.unshift(sizes.join(" "));
+  // The unit after the name: "2 garlic cloves", "3 thyme sprigs", "2 celery stalks".
+  if (amount && !amount.unit && words.length > 1) {
+    const trailing = findUnit(words.at(-1)!);
+    if (trailing && TRAILING_UNITS.has(trailing.id)) {
+      amount.unit = trailing;
+      words.pop();
+    }
+  }
   const name = words.join(" ").trim() || raw;
   const out: Ingredient = { raw, name };
   if (amount) out.amount = amount;
