@@ -68,6 +68,13 @@ test("aisles follow the shop", () => {
   assert.equal(aisle("baking powder"), "Pantry");
   assert.equal(aisle("vanilla extract"), "Pantry");
   assert.equal(aisle("lemon juice"), "Produce");
+  assert.equal(aisle("rolled oats"), "Pantry");
+  assert.equal(aisle("minced garlic"), "Produce");
+  assert.equal(aisle("anchovies"), "Meat & fish");
+  assert.equal(aisle("dinner rolls"), "Bakery");
+  assert.equal(aisle("mushrooms"), "Produce");
+  assert.equal(aisle("tomatoes"), "Produce");
+  assert.equal(aisle("blueberries"), "Produce");
   assert.equal(isBought("cold water"), false);
   assert.equal(isBought("milk"), true);
 });

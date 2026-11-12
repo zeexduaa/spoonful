@@ -184,7 +184,7 @@ const AISLE_WORDS: [Aisle, string[]][] = [
     "chili powder", "chilli powder", "garam masala", "curry powder", "coriander seed", "cardamom", "clove", "bay leaf",
     "vanilla", "saffron", "mustard seed", "fennel seed", "allspice", "cayenne", "italian seasoning", "herbes", "sumac", "za'atar"]],
   ["Meat & fish", ["chicken", "beef", "pork", "lamb", "mutton", "turkey", "bacon", "sausage", "ham", "mince", "steak", "fish",
-    "salmon", "tuna", "cod", "prawn", "shrimp", "anchov", "crab", "mussel"]],
+    "salmon", "tuna", "cod", "prawn", "shrimp", "anchovy", "anchovies", "crab", "mussel", "thigh", "breast", "drumstick", "wing"]],
   ["Dairy & eggs", ["milk", "butter", "cheese", "cream", "yogurt", "yoghurt", "egg", "ghee", "paneer", "parmesan", "mozzarella",
     "cheddar", "feta", "ricotta", "creme fraiche", "buttermilk"]],
   ["Bakery", ["bread", "bun", "roll", "tortilla", "pita", "naan", "baguette", "croissant", "bagel", "wrap"]],
@@ -212,11 +212,13 @@ export function aisle(name: string): Aisle {
   // Words that decide the aisle whatever else the name says: "chicken stock", "fish sauce",
   // "egg noodles", "butter beans" and "cream of tartar" are all on the pantry shelves.
   if (/\b(lemon|lime) (juice|zest)\b/.test(lower)) return "Produce";          // squeezed from the fruit
+  if (/berr(y|ies)\b/.test(lower) && !/\bfrozen\b/.test(lower)) return "Produce";   // blueberries, strawberries...
   if (/\b(baking powder|cocoa powder|custard powder)\b/.test(lower)) return "Pantry";
   if (/\bpowder\b|\bflakes\b|\bseasoning\b/.test(lower)) return "Spices & herbs";
   if (/\b(stock|broth|bouillon|sauce|noodles?|pasta|beans|cream of tartar|crackers?|paste|extract|essence)\b/.test(lower)) return "Pantry";
   for (const [where, words] of AISLE_WORDS) {
-    if (words.some((w) => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(lower))) return where;
+    // Whole words (with an optional plural), so "rolled oats" isn't a bread roll and "minced garlic" isn't mince.
+    if (words.some((w) => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:s|es)?\\b`).test(lower))) return where;
   }
   return "Other";
 }
