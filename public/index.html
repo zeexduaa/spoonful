@@ -2,10 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>spoonful</title>
+  <meta name="description" content="A recipe box and meal planner that works offline: scale recipes, plan the week, and get a shopping list that adds itself up.">
+  <meta name="theme-color" content="#b4532a" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1714" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main id="app">spoonful is starting…</main>
+  <header class="top">
+    <a class="brand" href="#/recipes" aria-label="spoonful home">
+      <img src="icon.svg" alt="" width="28" height="28"><span>spoonful</span>
+    </a>
+    <nav class="tabs" aria-label="Main">
+      <a href="#/recipes" data-tab="recipes">Recipes</a>
+      <a href="#/plan" data-tab="plan">Plan</a>
+      <a href="#/shop" data-tab="shop">Shopping</a>
+      <a href="#/settings" data-tab="settings" aria-label="Settings">Settings</a>
+    </nav>
+  </header>
+  <main id="app" tabindex="-1">
+    <noscript><p class="empty">spoonful needs JavaScript turned on.</p></noscript>
+  </main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/ui/app.js"></script>
 </body>
 </html>
