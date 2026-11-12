@@ -1,6 +1,6 @@
 /** The app's state, kept in the browser's storage, and the one way to change it. */
 
-import { type State, StorageError, emptyState, load, save } from "../core/storage.js";
+import { type State, STORAGE_KEY, StorageError, emptyState, load, save } from "../core/storage.js";
 import { toast } from "./dom.js";
 
 let current: State = emptyState();
@@ -40,10 +40,21 @@ export function problem(): string | undefined {
   return loadError;
 }
 
-/** Applies a change, saves it, and redraws. */
+/**
+ * Applies a change, saves it, and redraws. The change is applied to the latest saved state, not
+ * this tab's copy: with spoonful open in two tabs, saving the older copy would silently undo
+ * what the other tab saved (a recipe added there would vanish).
+ */
 export function update(change: (s: State) => void, message?: string): void {
-  change(current);
   const kv = storage();
+  if (kv && !readOnly) {
+    try {
+      current = load(kv);
+    } catch {
+      /* keep this tab's copy */
+    }
+  }
+  change(current);
   if (kv && !readOnly) {
     try {
       save(kv, current);
@@ -66,4 +77,22 @@ export function replace(next: State, message?: string): void {
 
 export function onChange(listener: () => void): void {
   listeners.push(listener);
+}
+
+/**
+ * Another tab saved: pick up its changes. Pages with a form being filled in aren't redrawn
+ * (that would throw away what's been typed); they pick the changes up on their next save.
+ */
+export function watchOtherTabs(isEditing: () => boolean): void {
+  window.addEventListener("storage", (e) => {
+    if (e.key !== STORAGE_KEY || readOnly) return;
+    const kv = storage();
+    if (!kv) return;
+    try {
+      current = load(kv);
+    } catch {
+      return;
+    }
+    if (!isEditing()) for (const l of listeners) l();
+  });
 }

@@ -64,6 +64,7 @@ function draw(): void {
 
 store.init();
 store.onChange(draw);
+store.watchOtherTabs(() => ["edit", "new", "import"].includes(route().page));
 window.addEventListener("hashchange", draw);
 draw();
 
