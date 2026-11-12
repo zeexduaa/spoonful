@@ -1,0 +1,19 @@
+{
+  "name": "spoonful",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A recipe box and meal planner that works offline: scale recipes, plan the week, and get a shopping list that adds itself up.",
+  "license": "MIT",
+  "author": "Syed Ali",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc -p . && node scripts/build.mjs",
+    "test": "tsc -p . && node scripts/test.mjs",
+    "start": "npm run build && node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
