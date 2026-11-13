@@ -36,7 +36,9 @@ export function shopping(query: URLSearchParams): Node {
         await navigator.clipboard.writeText(text);
         toast("copied: paste it into a message or notes");
       }
-    } catch {
+    } catch (err) {
+      // Closing the share sheet is a choice, not a failure: don't download a file nobody asked for.
+      if (err instanceof DOMException && err.name === "AbortError") return;
       download("shopping-list.txt", text, "text/plain");
     }
   };
