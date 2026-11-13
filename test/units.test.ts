@@ -19,6 +19,10 @@ test("reads numbers however recipes write them", () => {
   assert.equal(read("½"), 0.5);
   assert.equal(read("2.5"), 2.5);
   assert.equal(read("2,5"), 2.5);
+  assert.equal(read("1,000 g flour"), 1000);              // a thousands comma, not 1 g
+  assert.equal(read("2,500 ml"), 2500);
+  assert.equal(read("1,25 l"), 1.25);                     // a decimal comma
+  assert.equal(read("1,000,000"), 1000000);
   assert.equal(read(".5"), 0.5);
   assert.equal(read("a dozen eggs"), 12);
   assert.equal(read("an onion"), 1);

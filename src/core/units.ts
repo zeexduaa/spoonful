@@ -79,7 +79,9 @@ export function readNumber(text: string): { value: number; length: number } | un
   if (m && Number(m[3]) > 0) return { value: Number(m[1]) + Number(m[2]) / Number(m[3]), length: m[0].length };
   m = /^(\d+)\s*\/\s*(\d+)/.exec(t);                                           // 3/4
   if (m && Number(m[2]) > 0) return { value: Number(m[1]) / Number(m[2]), length: m[0].length };
-  m = /^(\d+(?:[.,]\d+)?|\.\d+)/.exec(t);                                      // 1.5, 1,5, .5
+  m = /^(\d{1,3}(?:,\d{3})+)(?![\d.,])/.exec(t);                               // 1,000 and 2,500: thousands
+  if (m) return { value: Number(m[1]!.replace(/,/g, "")), length: m[0].length };
+  m = /^(\d+(?:[.,]\d+)?|\.\d+)/.exec(t);                                      // 1.5, 1,5 (a decimal comma), .5
   if (m) return { value: Number(m[1]!.replace(",", ".")), length: m[0].length };
   m = /^([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])/.exec(t);
   if (m) return { value: VULGAR[m[1]!]!, length: 1 };
