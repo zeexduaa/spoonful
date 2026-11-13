@@ -1,7 +1,11 @@
 name: Publish to GitHub Pages
 
 # Builds the site and publishes it at https://<owner>.github.io/spoonful/ on every push to main.
-# One-time setup: in the repository's Settings > Pages, set "Source" to "GitHub Actions".
+#
+# Publishing needs GitHub Pages switched on once, by the repository's owner:
+#   Settings > Pages > Build and deployment > Source: "GitHub Actions".
+# Until then this workflow still builds and tests the site, then stops with a notice instead of
+# failing (and sending a failure email) on every push.
 
 on:
   push:
@@ -20,6 +24,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.pages.outputs.enabled }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -28,12 +34,26 @@ jobs:
       - run: npm install
       - run: npm test
       - run: npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
+      - name: Is GitHub Pages switched on?
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" --silent 2>/dev/null; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=GitHub Pages is off::The site was built and tested but not published. To publish it, open Settings > Pages and set Source to 'GitHub Actions'; the next push (or a re-run of this workflow) publishes it."
+          fi
+      - if: steps.pages.outputs.enabled == 'true'
+        uses: actions/configure-pages@v5
+      - if: steps.pages.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v4
         with:
           path: site
   deploy:
     needs: build
+    if: needs.build.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
